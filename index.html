@@ -1,0 +1,658 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker | Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+    <div>
+        <h1>Expense Tracker</h1>
+        <p>Personal Finance Management Dashboard</p>
+    </div>
+    <span class="tag">FINANCE DASHBOARD</span>
+</header>
+
+<main class="container">
+
+    <section class="welcome-row">
+        <div>
+            <h2>Dashboard Overview</h2>
+            <p>Track your spending, manage budgets and understand your finances.</p>
+        </div>
+        <div class="month-control">
+            <label for="selectedMonth">Select Month</label>
+            <input type="month" id="selectedMonth">
+        </div>
+    </section>
+
+    <section class="summary-grid">
+        <article class="summary-card">
+            <p>Total Spending</p>
+            <h2 id="totalSpent">₹0.00</h2>
+            <span>Selected month</span>
+        </article>
+        <article class="summary-card">
+            <p>Total Transactions</p>
+            <h2 id="totalTransactions">0</h2>
+            <span>Selected month</span>
+        </article>
+        <article class="summary-card">
+            <p>Average Expense</p>
+            <h2 id="averageExpense">₹0.00</h2>
+            <span>Per transaction</span>
+        </article>
+        <article class="summary-card">
+            <p>Total Budget</p>
+            <h2 id="totalBudget">₹0.00</h2>
+            <span>Selected month</span>
+        </article>
+    </section>
+
+    <section class="main-grid">
+
+        <article class="panel">
+            <div class="panel-heading">
+                <h2>Add New Expense</h2>
+            </div>
+
+            <form id="expenseForm">
+                <label for="description">Description</label>
+                <input id="description" type="text"
+                       maxlength="200" placeholder="e.g. Grocery shopping">
+
+                <label for="amount">Amount (₹)</label>
+                <input id="amount" type="number"
+                       min="0.01" step="0.01"
+                       placeholder="Enter amount" required>
+
+                <label for="category">Category</label>
+                <select id="category" required>
+                    <option value="">Select category</option>
+                </select>
+
+                <button type="submit">Add Expense</button>
+                <p class="message" id="expenseMessage"></p>
+            </form>
+        </article>
+
+        <article class="panel">
+            <div class="panel-heading">
+                <h2>Monthly Budget</h2>
+            </div>
+
+            <form id="budgetForm">
+                <label for="budgetCategory">Category</label>
+                <select id="budgetCategory" required>
+                    <option value="">Select category</option>
+                </select>
+
+                <label for="budgetAmount">Budget Amount (₹)</label>
+                <input id="budgetAmount" type="number"
+                       min="0.01" step="0.01"
+                       placeholder="Enter monthly budget" required>
+
+                <button type="submit">Save Budget</button>
+                <p class="message" id="budgetMessage"></p>
+            </form>
+        </article>
+
+    </section>
+
+    <section class="charts-grid">
+        <article class="panel">
+            <div class="panel-heading">
+                <h2>Spending by Category</h2>
+            </div>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </article>
+
+        <article class="panel">
+            <div class="panel-heading">
+                <h2>Budget Overview</h2>
+            </div>
+            <div id="budgetOverview" class="budget-overview">
+                No budget information available.
+            </div>
+        </article>
+    </section>
+
+    <section class="panel">
+        <div class="section-heading">
+            <h2>Recent Expenses</h2>
+            <a id="downloadReport" class="download-link" href="#">
+                Download Monthly Report
+            </a>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="expenseTable">
+                    <tr><td colspan="5">Loading expenses...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Manage Monthly Budgets</h2>
+            <span class="section-note">Edit or delete existing budgets</span>
+        </div>
+        <div class="table-wrapper"><table>
+            <thead><tr><th>Category</th><th>Month</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody id="budgetTable"><tr><td colspan="4">Loading budgets...</td></tr></tbody>
+        </table></div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Category Management</h2>
+        </div>
+
+        <form id="categoryForm" class="inline-form">
+            <input id="newCategory" type="text"
+                   maxlength="80" placeholder="Enter category name" required>
+            <button type="submit">Add Category</button>
+        </form>
+
+        <p class="message" id="categoryMessage"></p>
+        <div id="categoryList" class="category-list"></div>
+    </section>
+
+    <section class="panel">
+        <div class="panel-heading">
+            <h2>Monthly Category Report</h2>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Spent</th>
+                        <th>Budget</th>
+                        <th>Remaining</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTable">
+                    <tr><td colspan="5">Loading report...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>Expense Tracker | Built with Python, Flask and SQLite</p>
+    <p>Track smarter. Spend better.</p>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let categories = [];
+let expenseChart = null;
+
+function currentMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function money(value) {
+    return '₹' + Number(value || 0).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+async function api(url, options = {}) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Something went wrong');
+    }
+
+    return data;
+}
+
+function showMessage(id, message, isError = false) {
+    $(id).textContent = message;
+    $(id).className = isError ? 'message error' : 'message success';
+}
+
+function addCell(row, value) {
+    const cell = document.createElement('td');
+    cell.textContent = value;
+    row.appendChild(cell);
+    return cell;
+}
+
+function fillCategorySelects() {
+    ['category', 'budgetCategory'].forEach(id => {
+        const select = $(id);
+        select.innerHTML = '<option value="">Select category</option>';
+
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            select.appendChild(option);
+        });
+    });
+
+    const list = $('categoryList');
+    list.replaceChildren();
+
+    categories.forEach(category => {
+        const chip = document.createElement('span');
+        chip.className = 'category-chip';
+        const name = document.createElement('span');
+        name.textContent = category.name;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'category-remove';
+        remove.textContent = '×';
+        remove.title = `Delete ${category.name}`;
+        remove.addEventListener('click', () => deleteCategory(category.id, category.name));
+        chip.append(name, remove);
+        list.appendChild(chip);
+    });
+}
+
+async function loadCategories() {
+    categories = await api('/categories');
+    fillCategorySelects();
+}
+
+async function loadExpenses() {
+    const month = $('selectedMonth').value;
+    const expenses = await api(`/expenses?month=${encodeURIComponent(month)}`);
+
+    const table = $('expenseTable');
+    table.replaceChildren();
+
+    let total = 0;
+
+    if (expenses.length === 0) {
+        const row = table.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 5;
+        cell.textContent = 'No expenses recorded for this month.';
+    }
+
+    expenses.forEach(expense => {
+        total += Number(expense.amount);
+
+        const row = table.insertRow();
+
+        addCell(row, expense.description || 'General expense');
+        addCell(row, expense.category);
+        addCell(row, money(expense.amount));
+        addCell(row, new Date(expense.created_at).toLocaleDateString());
+
+        const actions = row.insertCell();
+
+        const edit = document.createElement('button');
+        edit.textContent = 'Edit';
+        edit.className = 'small-btn edit-btn';
+        edit.addEventListener('click', () => editExpense(expense));
+
+        const remove = document.createElement('button');
+        remove.textContent = 'Delete';
+        remove.className = 'small-btn delete-btn';
+        remove.addEventListener('click', () => deleteExpense(expense.id));
+
+        actions.append(edit, remove);
+    });
+
+    $('totalSpent').textContent = money(total);
+    $('totalTransactions').textContent = expenses.length;
+    $('averageExpense').textContent =
+        money(expenses.length ? total / expenses.length : 0);
+}
+
+async function editExpense(expense) {
+    const description = prompt(
+        'Enter expense description:',
+        expense.description || ''
+    );
+
+    if (description === null) return;
+
+    const amountText = prompt('Enter expense amount:', expense.amount);
+
+    if (amountText === null) return;
+
+    const amount = Number(amountText);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+        alert('Please enter a valid positive amount.');
+        return;
+    }
+
+    try {
+        await api(`/expenses/${expense.id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({description, amount})
+        });
+
+        await refreshDashboard();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function deleteExpense(id) {
+    if (!confirm('Are you sure you want to delete this expense?')) return;
+
+    try {
+        await api(`/expenses/${id}`, {method: 'DELETE'});
+        await refreshDashboard();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+async function loadBudgets() {
+    const budgets = await api('/budgets');
+    const table = $('budgetTable');
+    table.replaceChildren();
+    if (!budgets.length) {
+        const row = table.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 4;
+        cell.textContent = 'No saved budgets yet.';
+        return;
+    }
+    budgets.forEach(budget => {
+        const row = table.insertRow();
+        addCell(row, budget.category);
+        addCell(row, budget.month);
+        addCell(row, money(budget.amount));
+        const actions = row.insertCell();
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'small-btn edit-btn';
+        edit.textContent = 'Edit';
+        edit.addEventListener('click', () => editBudget(budget));
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'small-btn delete-btn';
+        remove.textContent = 'Delete';
+        remove.addEventListener('click', () => deleteBudget(budget));
+        actions.append(edit, remove);
+    });
+}
+
+async function editBudget(budget) {
+    const entered = prompt(`New budget for ${budget.category} (${budget.month}):`, budget.amount);
+    if (entered === null) return;
+    const amount = Number(entered);
+    if (!Number.isFinite(amount) || amount <= 0) {
+        alert('Enter a positive budget amount.');
+        return;
+    }
+    try {
+        await api(`/budgets/${budget.id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({amount})
+        });
+        await refreshDashboard();
+        showMessage('budgetMessage', 'Budget updated successfully!');
+    } catch (error) { alert(error.message); }
+}
+
+async function deleteBudget(budget) {
+    if (!confirm(`Delete ${budget.category} budget for ${budget.month}?`)) return;
+    try {
+        await api(`/budgets/${budget.id}`, {method: 'DELETE'});
+        await refreshDashboard();
+        showMessage('budgetMessage', 'Budget deleted successfully!');
+    } catch (error) { alert(error.message); }
+}
+
+async function deleteCategory(id, name) {
+    if (!confirm(`Delete category "${name}"?`)) return;
+    try {
+        await api(`/categories/${id}`, {method: 'DELETE'});
+        await refreshDashboard();
+        showMessage('categoryMessage', 'Category deleted successfully!');
+    } catch (error) {
+        showMessage('categoryMessage', error.message, true);
+    }
+}
+
+async function loadReport() {
+    const month = $('selectedMonth').value;
+    const report = await api(
+        `/reports/monthly?month=${encodeURIComponent(month)}`
+    );
+
+    const table = $('reportTable');
+    table.replaceChildren();
+
+    let totalBudget = 0;
+
+    report.forEach(item => {
+        if (item.budget !== null) totalBudget += Number(item.budget);
+
+        const row = table.insertRow();
+        addCell(row, item.category);
+        addCell(row, money(item.spent));
+        addCell(row, item.budget === null ? 'Not set' : money(item.budget));
+        addCell(row, item.remaining === null ? '—' : money(item.remaining));
+
+        const status = item.budget === null
+            ? 'No budget'
+            : item.within_budget ? 'Within budget' : 'Exceeded';
+
+        const cell = addCell(row, status);
+        cell.className = item.budget === null
+            ? 'status-neutral'
+            : item.within_budget ? 'status-good' : 'status-bad';
+    });
+
+    $('totalBudget').textContent = money(totalBudget);
+
+    updateBudgetOverview(report);
+    updateChart(report);
+}
+
+function updateBudgetOverview(report) {
+    const container = $('budgetOverview');
+    container.replaceChildren();
+
+    const budgeted = report.filter(item => item.budget !== null);
+
+    if (!budgeted.length) {
+        container.textContent = 'No budgets set for this month.';
+        return;
+    }
+
+    budgeted.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'budget-item';
+
+        const heading = document.createElement('div');
+        heading.className = 'budget-label';
+
+        const name = document.createElement('strong');
+        name.textContent = item.category;
+
+        const values = document.createElement('span');
+        values.textContent = `${money(item.spent)} / ${money(item.budget)}`;
+
+        heading.append(name, values);
+
+        const track = document.createElement('div');
+        track.className = 'progress-track';
+
+        const bar = document.createElement('div');
+        bar.className = 'progress-bar';
+
+        const percentage = item.budget > 0
+            ? Math.min((item.spent / item.budget) * 100, 100)
+            : 0;
+
+        bar.style.width = `${percentage}%`;
+
+        if (!item.within_budget) bar.classList.add('over-budget');
+
+        track.appendChild(bar);
+        wrapper.append(heading, track);
+
+        const status = document.createElement('small');
+        status.textContent = item.within_budget
+            ? `${money(item.budget - item.spent)} remaining`
+            : `${money(item.spent - item.budget)} over budget`;
+
+        wrapper.appendChild(status);
+        container.appendChild(wrapper);
+    });
+}
+
+function updateChart(report) {
+    const filtered = report.filter(item => item.spent > 0);
+    const canvas = $('expenseChart');
+
+    if (expenseChart) expenseChart.destroy();
+
+    expenseChart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: filtered.map(item => item.category),
+            datasets: [{
+                data: filtered.map(item => item.spent),
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {color: '#456b55'}
+                }
+            }
+        }
+    });
+}
+
+async function refreshDashboard() {
+    try {
+        $('downloadReport').href =
+            `/reports/monthly.csv?month=${encodeURIComponent($('selectedMonth').value)}`;
+
+        await loadCategories();
+        await loadExpenses();
+        await loadBudgets();
+        await loadReport();
+    } catch (error) {
+        console.error(error);
+        alert('Unable to load dashboard: ' + error.message);
+    }
+}
+
+$('expenseForm').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const data = {
+        description: $('description').value,
+        amount: Number($('amount').value),
+        category_id: Number($('category').value)
+    };
+
+    try {
+        await api('/expenses', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+
+        event.target.reset();
+        showMessage('expenseMessage', 'Expense added successfully!');
+        await refreshDashboard();
+    } catch (error) {
+        showMessage('expenseMessage', error.message, true);
+    }
+});
+
+$('budgetForm').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const data = {
+        category_id: Number($('budgetCategory').value),
+        amount: Number($('budgetAmount').value),
+        month: $('selectedMonth').value
+    };
+
+    try {
+        await api('/budgets', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+
+        event.target.reset();
+        showMessage('budgetMessage', 'Monthly budget saved successfully!');
+        await loadBudgets();
+        await loadReport();
+    } catch (error) {
+        showMessage('budgetMessage', error.message, true);
+    }
+});
+
+$('categoryForm').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const name = $('newCategory').value.trim();
+
+    try {
+        await api('/categories', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name})
+        });
+
+        event.target.reset();
+        showMessage('categoryMessage', 'Category added successfully!');
+        await loadCategories();
+        await loadReport();
+    } catch (error) {
+        showMessage('categoryMessage', error.message, true);
+    }
+});
+
+$('selectedMonth').value = currentMonth();
+
+$('selectedMonth').addEventListener('change', async () => {
+    await refreshDashboard();
+});
+
+refreshDashboard();
+</script>
+
+</body>
+</html>
